@@ -35,6 +35,7 @@ public class SimpleRadioItems {
 
     public static Item ANTENNA = register(id("antenna"), new BlockItem(SimpleRadioBlocks.ANTENNA, new Item.Properties().stacksTo(16)));
     public static Item INSULATOR = register(id("insulator"), new BlockItem(SimpleRadioBlocks.INSULATOR, new Item.Properties().stacksTo(16)));
+    public static Item RADAR_ARRAY = register(id("radar_array"), new BlockItem(SimpleRadioBlocks.RADAR_ARRAY, new Item.Properties().stacksTo(16)));
 
     // ---- Modules ---- \\
     public static Item TRANSMITTING_MODULE = register(id("transmitting_module"), new Item(new Item.Properties()));
@@ -50,33 +51,33 @@ public class SimpleRadioItems {
 
     public static void reload() {
         ITEMS.forEach((location, holder) -> {
-            String path = location.getPath();
-            Optional<LexiconPageData> configData = SimpleRadioLibrary.SERVER_CONFIG.getPage(path);
+            final String path = location.getPath();
+            final Optional<LexiconPageData> configData = SimpleRadioLibrary.SERVER_CONFIG.getPage(path);
             if (configData.isPresent()) {
                 holder.enabled = (boolean) configData.get().getEntry("enabled").orElse(false);
             }
 
             if (path.equals("walkie_talkie") || path.equals("spuddie_talkie")) {
-                LexiconPageData spudData = SimpleRadioLibrary.SERVER_CONFIG.getPage("walkie_talkie").orElse(null);
+                final LexiconPageData spudData = SimpleRadioLibrary.SERVER_CONFIG.getPage("walkie_talkie").orElse(null);
                 //TODO mak this beter
-                boolean enabled = (boolean) spudData.getEntry("enabled").orElse(false);
-                boolean spudder = (boolean) spudData.getEntry("spuddieTalkie").orElse(false);
+                final boolean enabled = (boolean) spudData.getEntry("enabled").orElse(false);
+                final boolean spudder = (boolean) spudData.getEntry("spuddieTalkie").orElse(false);
                 holder.enabled = enabled && path.equals("spuddie_talkie") == spudder;
             }
         });
     }
 
-    public static ItemHolder<Item> getByName(String name) {
-        Optional<Map.Entry<ResourceLocation, ItemHolder<Item>>> optional = ITEMS.entrySet().stream().filter(entry -> entry.getKey().getPath().equals(name)).findFirst();
+    public static ItemHolder<Item> getByName(final String name) {
+        final Optional<Map.Entry<ResourceLocation, ItemHolder<Item>>> optional = ITEMS.entrySet().stream().filter(entry -> entry.getKey().getPath().equals(name)).findFirst();
         return optional.map(Map.Entry::getValue).orElse(null);
     }
 
-    private static <I extends Item> I register(ResourceLocation location, I item) {
+    private static <I extends Item> I register(final ResourceLocation location, final I item) {
         return register(location, item, SimpleRadioMenus.RADIO_TAB_LOCATION);
     }
 
-    private static <I extends Item> I register(ResourceLocation location, I item, ResourceLocation tab) {
-        ItemHolder<I> holder = ItemHolder.of(item, tab);
+    private static <I extends Item> I register(final ResourceLocation location, final I item, final ResourceLocation tab) {
+        final ItemHolder<I> holder = ItemHolder.of(item, tab);
         ITEMS.put(location, (ItemHolder<Item>) holder);
         return item;
     }

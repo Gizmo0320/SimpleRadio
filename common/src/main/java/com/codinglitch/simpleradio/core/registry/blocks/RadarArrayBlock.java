@@ -3,7 +3,6 @@ package com.codinglitch.simpleradio.core.registry.blocks;
 import com.codinglitch.simpleradio.central.Receiving;
 import com.codinglitch.simpleradio.central.Routing;
 import com.codinglitch.simpleradio.central.Transmitting;
-import com.codinglitch.simpleradio.core.registry.SimpleRadioBlockEntities;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.core.BlockPos;
@@ -28,6 +27,6 @@ public class RadarArrayBlock extends BaseEntityBlock implements Routing, Receivi
   @Nullable
   @Override
   public <T extends BlockEntity> BlockEntityTicker<T> getTicker(final Level level, final BlockState state, final BlockEntityType<T> type) {
-    return createTickerHelper(type, SimpleRadioBlockEntities.RADAR_ARRAY, RadarArrayBlockEntity::tick);
+    return createTickerHelper(type, com.codinglitch.simpleradio.core.registry.SimpleRadioBlockEntities.RADAR_ARRAY, RadarArrayBlockEntity::tick);
   }
 }

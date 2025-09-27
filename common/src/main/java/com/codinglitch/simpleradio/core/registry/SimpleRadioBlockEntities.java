@@ -44,7 +44,7 @@ public class SimpleRadioBlockEntities {
 
     public static final BlockEntityType<RadarArrayBlockEntity> RADAR_ARRAY = Services.REGISTRY.registerBlockEntity(
             RadarArrayBlockEntity::new, id("radar_array"), SimpleRadioBlocks.RADAR_ARRAY
-    );
+                                                                                                                  );
 
     public static void load() {}
 }
