@@ -4,10 +4,8 @@ import com.codinglitch.simpleradio.central.AuditoryBlockEntity;
 import com.codinglitch.simpleradio.central.Receiving;
 import com.codinglitch.simpleradio.central.Routing;
 import com.codinglitch.simpleradio.central.Transmitting;
-import com.codinglitch.simpleradio.central.WorldlyPosition;
-import com.codinglitch.simpleradio.core.registry.SimpleRadioFrequencing;
-import com.codinglitch.simpleradio.radio.RadarArrayReceiver;
-import com.codinglitch.simpleradio.radio.RadarArrayTransmitter;
+import org.jetbrains.annotations.Nullable;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -23,13 +21,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-/**
- * Radar Array Block; mirrors Transmitter/Receiver patterns to preserve frequency NBT to item.
- */
 public class RadarArrayBlock extends BaseEntityBlock implements Routing, Receiving, Transmitting {
   public RadarArrayBlock(final Properties properties) {
     super(properties);
@@ -76,38 +70,5 @@ public class RadarArrayBlock extends BaseEntityBlock implements Routing, Receivi
       if (res != null) return res;
     }
     return super.use(state, level, pos, player, hand, result);
-  }
-
-  private void activate() {
-    if (this.level == null || this.level.isClientSide) return;
-    if (this.frequency == null || this.id == null) return;
-    if (this.isActive) return;
-
-    final WorldlyPosition here = WorldlyPosition.of(getBlockPos(), level);
-
-    final RadarArrayReceiver rar = new RadarArrayReceiver(frequency, here, this.id);
-    rar.frequencingType(SimpleRadioFrequencing.RECEIVER);
-    rar.setLink(RadarArrayBlock.class); // FIX: use Block class
-
-    final RadarArrayTransmitter rat = new RadarArrayTransmitter(frequency, here, this.id);
-    rat.frequencingType(SimpleRadioFrequencing.TRANSMITTER);
-    rat.setLink(RadarArrayBlock.class); // FIX: use Block class
-
-    // keep antenna power assignment if you have it
-    rar.antennaPower = this.antennaPower;
-    rat.antennaPower = this.antennaPower;
-
-    this.receiver = rar;
-    this.transmitter = rat;
-
-    frequency.registerReceiver(this.receiver);
-    frequency.registerTransmitter(this.transmitter);
-
-    rar.updateLocation(here);
-    rat.updateLocation(here);
-
-    this.isActive = true;
-    this.isDirty = true;
-    this.setChanged();
   }
 }
