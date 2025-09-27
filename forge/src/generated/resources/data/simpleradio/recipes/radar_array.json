@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "RTR",
+    "SAS",
+    "III"
+  ],
+  "key": {
+    "R": { "item": "simpleradio:receiver" },
+    "T": { "item": "simpleradio:transmitter" },
+    "A": { "item": "simpleradio:antenna" },
+    "S": { "item": "minecraft:redstone" },
+    "I": { "item": "minecraft:iron_ingot" }
+  },
+  "result": { "item": "simpleradio:radar_array", "count": 1 }
+}

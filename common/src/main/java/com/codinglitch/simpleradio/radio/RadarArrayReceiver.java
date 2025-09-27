@@ -1,11 +1,9 @@
 package com.codinglitch.simpleradio.radio;
 
 import com.codinglitch.simpleradio.SimpleRadioLibrary;
-import com.codinglitch.simpleradio.central.FrequencingType;
 import com.codinglitch.simpleradio.central.Frequency;
 import com.codinglitch.simpleradio.central.WorldlyPosition;
 import com.codinglitch.simpleradio.core.registry.blocks.RadarArrayBlockEntity;
-import com.codinglitch.simpleradio.routers.Receiver;
 import com.codinglitch.simpleradio.routers.Router;
 import com.codinglitch.simpleradio.routers.Transmitter;
 
@@ -25,26 +23,14 @@ public class RadarArrayReceiver extends RadioReceiver {
   }
 
   @Override
-  public RadarArrayReceiver frequencingType(final FrequencingType type) {
-    super.frequencingType(type);
-    return this;
-  }
-
-  @Override
-  public RadarArrayReceiver frequency(final Frequency frequency) {
-    super.frequency(frequency);
-    return this;
-  }
-
-  @Override
   public void take(final Source source) {
     if (!this.active) return;
     if (acceptCriteria != null && !acceptCriteria.test(source)) return;
 
-    // 1) Normal local routing (within the same dimension)
+    // 1) Normal local routing (same dimension)
     super.take(source);
 
-    // 2) Cross-dimensional mirroring (existing config toggle)
+    // 2) Cross-dimensional mirroring (guarded by existing config)
     if (!SimpleRadioLibrary.SERVER_CONFIG.frequency.crossDimensional) return;
     final Frequency freq = this.getFrequency();
     if (freq == null) return;
@@ -52,12 +38,11 @@ public class RadarArrayReceiver extends RadioReceiver {
     final WorldlyPosition here = this.getLocation();
     if (here == null) return;
 
-    // Mirror to other Radar Array transmitters on the same frequency
+    // Find remote Radar Array transmitters on same frequency in other dimensions
     final List<Transmitter> txs = freq.getTransmitters();
     for (final Transmitter tx : txs) {
-      if (!(tx instanceof final RadioTransmitter rt)) continue;
+      if (!(tx instanceof RadioTransmitter)) continue;
 
-      // Only mirror to arrays (link marker) and skip self and same dimension
       final Router rtr = (Router) tx;
       if (rtr.getLink() == null || !Objects.equals(rtr.getLink(), RadarArrayBlockEntity.class)) continue;
       if (Objects.equals(rtr.getReference(), this.reference)) continue;
@@ -66,18 +51,27 @@ public class RadarArrayReceiver extends RadioReceiver {
       if (there == null) continue;
       if (there.level == here.level) continue;
 
-      // Avoid immediate feedback into sender
+      // Prevent immediate feedback into sender
       if (source.getOwner() != null && source.getOwner().equals(rtr.getReference())) continue;
 
-      // Re-emit from remote transmitter in its own dimension with the same data/volume if present.
-      final byte[] data = source.getData();
-      if (data != null) {
-        // Sender is this array's id to maintain loop-prevention on the remote side
-        ((Router) tx).send(data, source.getVolume());
-      } else if (source.getSound() != null) {
-        // If Source contains a sound event instead of Opus data, mirror that
-        ((Router) tx).send(there, this.reference, source.getSoundHolder(), source.getVolume(), source.getPitch(), source.getSeed());
-      }
+      // Mirror by forwarding a copy of the Source to the remote transmitter.
+      // No need for volume/sound getters; accept() handles routing from the remote location.
+      final Source mirrored = source.copy();
+      mirrored.setOwner(this.reference);
+
+      // Optional: apply a simple hop penalty using existing knobs
+      // Dimensional interference scalar and thresholds to reduce effective power
+      final double dimK = SimpleRadioLibrary.SERVER_CONFIG.frequency.dimensionalInterference;
+      final int floor = SimpleRadioLibrary.SERVER_CONFIG.receiver.receptionFloor;
+      final int thresh = (freq.getModulation() == Frequency.Modulation.FREQUENCY)
+                   ? SimpleRadioLibrary.SERVER_CONFIG.transmitter.diminishThresholdFM
+                   : SimpleRadioLibrary.SERVER_CONFIG.transmitter.diminishThresholdAM;
+      final float hopCost = (float) (dimK * Math.max(floor, thresh));
+
+      final float remaining = Math.max(0f, mirrored.getPower() - hopCost);
+      mirrored.setPower(remaining);
+
+      ((Router) tx).accept(mirrored);
     }
   }
 }

@@ -6,7 +6,6 @@ import com.codinglitch.simpleradio.central.Transmitting;
 import com.codinglitch.simpleradio.central.WorldlyPosition;
 import com.codinglitch.simpleradio.core.registry.SimpleRadioBlockEntities;
 import com.codinglitch.simpleradio.core.registry.SimpleRadioFrequencing;
-import com.codinglitch.simpleradio.platform.Services;
 import com.codinglitch.simpleradio.radio.RadarArrayReceiver;
 import com.codinglitch.simpleradio.radio.RadarArrayTransmitter;
 import com.codinglitch.simpleradio.routers.Receiver;
@@ -16,12 +15,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.UUID;
-
-/**
- * Radar Array BE: registers both a receiver and a transmitter on the same frequency and reference,
- * and mirrors across dimensions via the RadarArrayReceiver.
- */
 public class RadarArrayBlockEntity extends CatalyzingBlockEntity implements Receiving, Transmitting {
 
   public boolean isActive = false;
@@ -34,7 +27,6 @@ public class RadarArrayBlockEntity extends CatalyzingBlockEntity implements Rece
 
   @Override
   public BlockPos getAdaptorLocation() {
-    // Use front face like ReceiverBlock does (fallback to block center if needed)
     if (getBlockState().hasProperty(ReceiverBlock.FACING)) {
       return getBlockPos().relative(getBlockState().getValue(ReceiverBlock.FACING).getOpposite());
     }
@@ -123,27 +115,24 @@ public class RadarArrayBlockEntity extends CatalyzingBlockEntity implements Rece
     if (this.frequency == null || this.id == null) return;
     if (this.isActive) return;
 
-    // Create both routers on the same reference id; set link to identify as arrays.
     final WorldlyPosition here = WorldlyPosition.of(getBlockPos(), level);
 
     final RadarArrayReceiver rar = new RadarArrayReceiver(frequency, here, this.id);
-    rar.frequencingType(SimpleRadioFrequencing.RECEIVER); // or TRANSCEIVER; both reuse existing config
+    rar.frequencingType(SimpleRadioFrequencing.RECEIVER);
     rar.setLink(RadarArrayBlockEntity.class);
     rar.antennaPower = this.antennaPower;
 
     final RadarArrayTransmitter rat = new RadarArrayTransmitter(frequency, here, this.id);
-    rat.frequencingType(SimpleRadioFrequencing.TRANSMITTER); // or TRANSCEIVER
+    rat.frequencingType(SimpleRadioFrequencing.TRANSMITTER);
     rat.setLink(RadarArrayBlockEntity.class);
     rat.antennaPower = this.antennaPower;
 
     this.receiver = rar;
     this.transmitter = rat;
 
-    // Register to the frequency
     frequency.registerReceiver(this.receiver);
     frequency.registerTransmitter(this.transmitter);
 
-    // Let platform do VS/Create position transforms via Router.tick()
     rar.updateLocation(here);
     rat.updateLocation(here);
 
@@ -160,9 +149,6 @@ public class RadarArrayBlockEntity extends CatalyzingBlockEntity implements Rece
       if (this.transmitter != null) {
         this.frequency.removeTransmitter(this.transmitter);
       }
-
-      // Clear cached router instances for this id on both sides
-      SimpleRadioApi.removeRouterSided(this.id, Services.PLATFORM.isClientSide(this.level));
     }
 
     this.receiver = null;

@@ -7,9 +7,6 @@ import net.minecraft.world.entity.Entity;
 
 import java.util.UUID;
 
-/**
- * Transmitter half of a Radar Array. Uses same power math as RadioTransmitter.
- */
 public class RadarArrayTransmitter extends RadioTransmitter {
 
   public RadarArrayTransmitter(final Frequency frequency, final WorldlyPosition location, final UUID id) {
