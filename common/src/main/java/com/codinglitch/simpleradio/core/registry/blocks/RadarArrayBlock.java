@@ -1,17 +1,18 @@
 package com.codinglitch.simpleradio.core.registry.blocks;
 
-import com.codinglitch.simpleradio.central.Routing;
 import com.codinglitch.simpleradio.central.Receiving;
+import com.codinglitch.simpleradio.central.Routing;
 import com.codinglitch.simpleradio.central.Transmitting;
 import com.codinglitch.simpleradio.core.registry.SimpleRadioBlockEntities;
+import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 
 public class RadarArrayBlock extends BaseEntityBlock implements Routing, Receiving, Transmitting {
   public RadarArrayBlock(final Properties properties) {
@@ -21,7 +22,7 @@ public class RadarArrayBlock extends BaseEntityBlock implements Routing, Receivi
   @Nullable
   @Override
   public BlockEntity newBlockEntity(final BlockPos pos, final BlockState state) {
-    return SimpleRadioBlockEntities.RADAR_ARRAY.create(pos, state);
+    return new RadarArrayBlockEntity(pos, state);
   }
 
   @Nullable
