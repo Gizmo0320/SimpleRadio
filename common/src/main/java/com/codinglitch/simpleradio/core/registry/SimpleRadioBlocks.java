@@ -45,10 +45,6 @@ public class SimpleRadioBlocks {
             Block.Properties.of().strength(2.0F, 3.0F).sound(SoundType.WOOD).instabreak()
     ));
 
-    public static RadarArrayBlock RADAR_ARRAY = (RadarArrayBlock) register(id("radar_array"), new RadarArrayBlock(
-            Block.Properties.of().strength(3.0F, 6.0F).sound(SoundType.METAL)
-    ));
-
     private static Block register(final ResourceLocation location, final Block block) {
         BLOCKS.put(location, block);
         return block;
