@@ -15,6 +15,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+
 public class RadarArrayBlockEntity extends CatalyzingBlockEntity implements Receiving, Transmitting {
 
   public boolean isActive = false;
@@ -23,6 +26,18 @@ public class RadarArrayBlockEntity extends CatalyzingBlockEntity implements Rece
 
   public RadarArrayBlockEntity(final BlockPos pos, final BlockState state) {
     super(SimpleRadioBlockEntities.RADAR_ARRAY, pos, state);
+  }
+
+  @Override
+  public UUID getReference() {
+    if (this.id != null) return this.id;
+
+    // Deterministic fallback: dimension + position -> UUID
+    final String dim = this.level != null && this.level.dimension() != null
+                 ? this.level.dimension().location().toString()
+                 : "unknown";
+    final String key = dim + "@" + this.getBlockPos().toShortString();
+    return UUID.nameUUIDFromBytes(key.getBytes(StandardCharsets.UTF_8));
   }
 
   @Override

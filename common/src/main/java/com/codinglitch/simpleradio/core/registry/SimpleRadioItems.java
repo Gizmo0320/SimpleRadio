@@ -35,7 +35,7 @@ public class SimpleRadioItems {
 
     public static Item ANTENNA = register(id("antenna"), new BlockItem(SimpleRadioBlocks.ANTENNA, new Item.Properties().stacksTo(16)));
     public static Item INSULATOR = register(id("insulator"), new BlockItem(SimpleRadioBlocks.INSULATOR, new Item.Properties().stacksTo(16)));
-    public static Item RADAR_ARRAY = register(id("radar_array"), new BlockItem(SimpleRadioBlocks.RADAR_ARRAY, new Item.Properties().stacksTo(16)));
+    public static RadarArrayItem RADAR_ARRAY = register(id("radar_array"), new RadarArrayItem(new Item.Properties().stacksTo(16)));
 
     // ---- Modules ---- \\
     public static Item TRANSMITTING_MODULE = register(id("transmitting_module"), new Item(new Item.Properties()));
